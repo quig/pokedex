@@ -7,4 +7,4 @@ npm-debug.*
 *.mobileprovision
 .DS_Store
 firebase/
-*.config.js
+firebase.config.js
