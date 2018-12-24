@@ -7,6 +7,7 @@ import {
     List,
     ListItem,
     Icon,
+    SearchBar,
 } from 'react-native-elements'
 import { pokemon_list } from './PokemonList'
 
@@ -24,8 +25,25 @@ export default class HomeScreen extends React.Component {
             ),
         }
     }
+    constructor(props) {
+        super(props)
 
-    state = { pokeList: pokemon_list }
+        this.state = {
+            loading: false,
+            pokeList: pokemon_list,
+        }
+    }
+
+    searchFilterFunction = text => {
+        const filteredList = pokemon_list.filter(item => {
+            const name = item.name.toUpperCase()
+            const input = text.toUpperCase()
+            return name.indexOf(input) > -1
+        })
+        this.setState({
+            pokeList: filteredList,
+        })
+    }
 
     renderRow = ({ item }) => (
         <ListItem
@@ -44,11 +62,23 @@ export default class HomeScreen extends React.Component {
     render() {
         return (
             <View style={{ flex: 1 }}>
-                <List>
+                <List
+                    containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}
+                >
                     <FlatList
                         data={this.state.pokeList}
                         renderItem={this.renderRow}
                         keyExtractor={item => `${item.id}`}
+                        ListHeaderComponent={
+                            <SearchBar
+                                placeholder="Search"
+                                lightTheme
+                                onChangeText={text =>
+                                    this.searchFilterFunction(text)
+                                }
+                                autoCorrect={false}
+                            />
+                        }
                     />
                 </List>
             </View>
