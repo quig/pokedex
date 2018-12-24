@@ -3,6 +3,10 @@ import HomeScreen from './src/HomeScreen'
 import DetailsScreen from './src/DetailsScreen'
 import PhotoScreen from './src/PhotoScreen'
 import { createStackNavigator, createAppContainer } from 'react-navigation'
+import firebase from 'firebase'
+import { FirebaseConfig } from './firebase.config'
+
+firebase.initializeApp(FirebaseConfig)
 
 const RootStack = createStackNavigator(
     {

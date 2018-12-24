@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { Button, Image, View } from 'react-native'
 import { ImagePicker, Permissions } from 'expo'
+import uuid from 'uuid'
+import firebase from 'firebase'
 
 export default class PhotoScreen extends Component {
     state = {
@@ -19,7 +21,7 @@ export default class PhotoScreen extends Component {
                 }}
             >
                 <Button
-                    title="Pick an image from camera roll"
+                    title="Choose the image you want to analyse"
                     onPress={this._pickImage}
                 />
                 {image && (
@@ -30,6 +32,29 @@ export default class PhotoScreen extends Component {
                 )}
             </View>
         )
+    }
+
+    _uploadAsFile = async uri => {
+        const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest()
+            xhr.onload = function() {
+                resolve(xhr.response)
+            }
+            xhr.onerror = function(e) {
+                reject(new TypeError('Network request failed'))
+            }
+            xhr.responseType = 'blob'
+            xhr.open('GET', uri, true)
+            xhr.send(null)
+        })
+
+        const ref = firebase
+            .storage()
+            .ref()
+            .child(uuid.v4())
+        const snapshot = await ref.put(blob)
+        blob.close()
+        return await snapshot.ref.getDownloadURL()
     }
 
     _pickImage = async () => {
@@ -43,14 +68,9 @@ export default class PhotoScreen extends Component {
                     allowsEditing: true,
                     aspect: [4, 3],
                 })
-
-                console.log(result)
-
                 if (!result.cancelled) {
                     this.setState({ image: result.uri })
-                    /**
-                     * send the image to firebase for analysis
-                     */
+                    this._uploadAsFile(result.uri)
                 }
             }
         } catch (error) {

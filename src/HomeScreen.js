@@ -25,13 +25,9 @@ export default class HomeScreen extends React.Component {
             ),
         }
     }
-    constructor(props) {
-        super(props)
-
-        this.state = {
-            loading: false,
-            pokeList: pokemon_list,
-        }
+    state = {
+        loading: false,
+        pokeList: pokemon_list,
     }
 
     searchFilterFunction = text => {
@@ -61,27 +57,23 @@ export default class HomeScreen extends React.Component {
 
     render() {
         return (
-            <View style={{ flex: 1 }}>
-                <List
-                    containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}
-                >
-                    <FlatList
-                        data={this.state.pokeList}
-                        renderItem={this.renderRow}
-                        keyExtractor={item => `${item.id}`}
-                        ListHeaderComponent={
-                            <SearchBar
-                                placeholder="Search"
-                                lightTheme
-                                onChangeText={text =>
-                                    this.searchFilterFunction(text)
-                                }
-                                autoCorrect={false}
-                            />
-                        }
-                    />
-                </List>
-            </View>
+            <List containerStyle={{ borderTopWidth: 0, borderBottomWidth: 0 }}>
+                <FlatList
+                    data={this.state.pokeList}
+                    renderItem={this.renderRow}
+                    keyExtractor={item => `${item.id}`}
+                    ListHeaderComponent={
+                        <SearchBar
+                            placeholder="Search"
+                            lightTheme
+                            onChangeText={text =>
+                                this.searchFilterFunction(text)
+                            }
+                            autoCorrect={false}
+                        />
+                    }
+                />
+            </List>
         )
     }
 }
