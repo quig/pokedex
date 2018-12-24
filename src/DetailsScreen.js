@@ -46,6 +46,7 @@ export default class DetailsScreen extends Component {
                                 'https://pokeapi.co/api/v2/version/1/',
                     )
                     .map(entry => entry.flavor_text)[0]
+                    .replace(/\s+/g, ' ')
                 console.log(description)
                 this.setState({
                     ...this.state,
