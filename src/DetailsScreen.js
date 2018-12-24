@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { Image, View, ActivityIndicator, Content } from 'react-native'
 import { Button, Text } from 'react-native-elements'
 import axios from 'axios'
@@ -57,7 +57,6 @@ export default class DetailsScreen extends Component {
                 description: description,
             })
         } catch (err) {
-            console.log(err)
             this.setState({
                 ...this.state.default,
             })
@@ -79,7 +78,7 @@ export default class DetailsScreen extends Component {
                     <ActivityIndicator size="small" color="#f4511e" />
                 )}
                 {this.state.isReady && (
-                    <View>
+                    <Fragment>
                         {this.state.uri ? (
                             <Image
                                 style={{ width: 250, height: 250 }}
@@ -87,15 +86,11 @@ export default class DetailsScreen extends Component {
                                 resizeMode="contain"
                             />
                         ) : (
-                            <Image
-                                style={{ width: 250, height: 250 }}
-                                source={this.state.image}
-                                resizeMode="contain"
-                            />
+                            <Image source={this.state.image} />
                         )}
                         <Text h1>{this.state.name}</Text>
                         <Text>{this.state.description}</Text>
-                    </View>
+                    </Fragment>
                 )}
             </View>
         )
