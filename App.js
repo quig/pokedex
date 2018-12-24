@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import HomeScreen from './src/HomeScreen'
 import DetailsScreen from './src/DetailsScreen'
+import PhotoScreen from './src/PhotoScreen'
 import { createStackNavigator, createAppContainer } from 'react-navigation'
 
 const RootStack = createStackNavigator(
@@ -10,6 +11,9 @@ const RootStack = createStackNavigator(
         },
         Details: {
             screen: DetailsScreen,
+        },
+        Photo: {
+            screen: PhotoScreen,
         },
     },
     {

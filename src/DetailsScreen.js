@@ -1,26 +1,65 @@
 import React, { Component } from 'react'
-import { Button, View, Text } from 'react-native'
+import { View, ActivityIndicator, Content } from 'react-native'
+import { Image, Button, Text } from 'react-native-elements'
 
 export default class DetailsScreen extends Component {
     static navigationOptions = ({ navigation, navigationOptions }) => {
         const { params } = navigation.state
-
         return {
-            title: params ? params.otherParam : 'A Nested Details Screen',
-            /* These values are used instead of the shared configuration! */
             headerStyle: {
                 backgroundColor: navigationOptions.headerTintColor,
             },
             headerTintColor: navigationOptions.headerStyle.backgroundColor,
         }
     }
-
+    constructor(props) {
+        super(props)
+        const defaultPokemon = {
+            id: '201',
+            name: 'Unown',
+            types: ['?'],
+            image: require('../assets/sprites/201.png'),
+            description: 'We have not been able to find your pokemon',
+        }
+        const { params } = props.navigation.state
+        const { id, name, avatar, types } = params
+            ? params.pokemon
+            : defaultPokemon
+        this.state = {
+            id: id,
+            name: name,
+            avatar: avatar,
+            types: types,
+            default: defaultPokemon,
+            isReady: false,
+        }
+    }
+    componentDidMount() {
+        fetch(`http://pokeapi.co/api/v2/pokemon-species/${this.state.id}/`)
+            .then(res => res.json())
+            .then(data => {
+                const description = data.flavor_text_entries
+                    .filter(
+                        description =>
+                            description.language.name === 'en' &&
+                            description.version.url ===
+                                'https://pokeapi.co/api/v2/version/1/',
+                    )
+                    .map(description => description.flavor_text)
+                this.setState({
+                    ...this.state,
+                    desription: description,
+                    isReady: true,
+                })
+            })
+            .catch(err =>
+                this.setState({
+                    ...this.state.defaultPokemon,
+                    isReady: true,
+                }),
+            )
+    }
     render() {
-        /* 2. Read the params from the navigation state */
-        const { params } = this.props.navigation.state
-        const itemId = params ? params.itemId : null
-        const otherParam = params ? params.otherParam : null
-
         return (
             <View
                 style={{
@@ -29,25 +68,15 @@ export default class DetailsScreen extends Component {
                     justifyContent: 'center',
                 }}
             >
-                <Text>Details Screen</Text>
-                <Text>itemId: {JSON.stringify(itemId)}</Text>
-                <Text>otherParam: {JSON.stringify(otherParam)}</Text>
-                <Button
-                    title="Update the title"
-                    onPress={() =>
-                        this.props.navigation.setParams({
-                            otherParam: 'Updated!',
-                        })
-                    }
-                />
-                <Button
-                    title="Go to Details... again"
-                    onPress={() => this.props.navigation.navigate('Details')}
-                />
-                <Button
-                    title="Go back"
-                    onPress={() => this.props.navigation.goBack()}
-                />
+                {!this.state.isReady && (
+                    <ActivityIndicator size="small" color="#f4511e" />
+                )}
+                {this.state.isReady && (
+                    <View>
+                        <Text h1>{this.state.name}</Text>
+                        <Text>{this.state.description}</Text>
+                    </View>
+                )}
             </View>
         )
     }

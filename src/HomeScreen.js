@@ -1,58 +1,56 @@
 import React, { Component } from 'react'
-import { Button, Image, Platform, View, Text } from 'react-native'
+import { View, FlatList } from 'react-native'
+import {
+    Header,
+    Text,
+    Button,
+    List,
+    ListItem,
+    Icon,
+} from 'react-native-elements'
+import { pokemon_list } from './PokemonList'
 
 export default class HomeScreen extends React.Component {
     static navigationOptions = ({ navigation }) => {
         return {
-            headerTitle: (
-                <Image
-                    source={require('../assets/icon.png')}
-                    style={{ width: 30, height: 30 }}
-                />
-            ),
+            headerTitle: 'Pokedex',
             headerRight: (
-                <Button
-                    onPress={navigation.getParam('increaseCount')}
-                    title="+1"
-                    color={Platform.OS === 'ios' ? '#fff' : null}
+                <Icon
+                    onPress={() => navigation.navigate('Photo')}
+                    name="photo-camera"
+                    color="#fff"
+                    size={40}
                 />
             ),
         }
     }
 
-    componentWillMount() {
-        this.props.navigation.setParams({ increaseCount: this._increaseCount })
-    }
+    state = { pokeList: pokemon_list }
 
-    state = {
-        count: 0,
-    }
-
-    _increaseCount = () => {
-        this.setState({ count: this.state.count + 1 })
-    }
+    renderRow = ({ item }) => (
+        <ListItem
+            roundAvatar
+            avatar={item.avatar}
+            key={item.id}
+            onPress={() =>
+                this.props.navigation.navigate('Details', {
+                    pokemon: item,
+                })
+            }
+            title={item.name}
+        />
+    )
 
     render() {
         return (
-            <View
-                style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}
-            >
-                <Text>Home Screen</Text>
-                <Text>Count: {this.state.count}</Text>
-                <Button
-                    title="Go to Details"
-                    onPress={() => {
-                        /* 1. Navigate to the Details route with params */
-                        this.props.navigation.navigate('Details', {
-                            itemId: 86,
-                            otherParam: 'First Details',
-                        })
-                    }}
-                />
+            <View style={{ flex: 1 }}>
+                <List>
+                    <FlatList
+                        data={this.state.pokeList}
+                        renderItem={this.renderRow}
+                        keyExtractor={item => `${item.id}`}
+                    />
+                </List>
             </View>
         )
     }
