@@ -32,13 +32,6 @@ export default class PhotoScreen extends Component {
         )
     }
 
-    askPermissionsAsync = async () => {
-        await Permissions.askAsync(Permissions.CAMERA)
-        await Permissions.askAsync(Permissions.CAMERA_ROLL)
-        // you would probably do something to verify that permissions
-        // are actually granted, but I'm skipping that for brevity
-    }
-
     _pickImage = async () => {
         try {
             const res = await Promise.all([
@@ -55,6 +48,9 @@ export default class PhotoScreen extends Component {
 
                 if (!result.cancelled) {
                     this.setState({ image: result.uri })
+                    /**
+                     * send the image to firebase for analysis
+                     */
                 }
             }
         } catch (error) {
