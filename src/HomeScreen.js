@@ -48,7 +48,7 @@ export default class HomeScreen extends React.Component {
     renderRow = ({ item }) => (
         <ListItem
             roundAvatar
-            avatar={item.avatar}
+            avatar={item.image}
             key={item.id}
             onPress={() =>
                 this.props.navigation.navigate('Details', {

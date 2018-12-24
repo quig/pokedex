@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { View, ActivityIndicator, Content } from 'react-native'
-import { Image, Button, Text } from 'react-native-elements'
+import { Image, View, ActivityIndicator, Content } from 'react-native'
+import { Button, Text } from 'react-native-elements'
+import axios from 'axios'
 
 export default class DetailsScreen extends Component {
     static navigationOptions = ({ navigation, navigationOptions }) => {
@@ -22,45 +23,49 @@ export default class DetailsScreen extends Component {
             description: 'We have not been able to find your pokemon',
         }
         const { params } = props.navigation.state
-        const { id, name, avatar, types } = params
+        const { id, name, image, types } = params
             ? params.pokemon
             : defaultPokemon
         this.state = {
             id: id,
             name: name,
-            avatar: avatar,
+            image: image,
             types: types,
             default: defaultPokemon,
             isReady: false,
         }
     }
-    componentDidMount() {
-        fetch(`https://pokeapi.co/api/v2/pokemon-species/${this.state.id}/`)
-            .then(res => res.json())
-            .then(data => {
-                const description = data.flavor_text_entries
-                    .filter(
-                        entry =>
-                            entry.language.name === 'en' &&
-                            entry.version.url ===
-                                'https://pokeapi.co/api/v2/version/1/',
-                    )
-                    .map(entry => entry.flavor_text)[0]
-                    .replace(/\s+/g, ' ')
-                console.log(description)
-                this.setState({
-                    ...this.state,
-                    description: description,
-                    isReady: true,
-                })
-            })
-            .catch(err =>
-                this.setState({
-                    ...this.state.defaultPokemon,
-                    isReady: true,
-                }),
+    componentDidMount = async () => {
+        try {
+            const pokemonDetails = await axios(
+                `https://pokeapi.co/api/v2/pokemon-species/${this.state.id}/`,
             )
+            const description = pokemonDetails.data.flavor_text_entries
+                .filter(
+                    entry =>
+                        entry.language.name === 'en' &&
+                        entry.version.url ===
+                            'https://pokeapi.co/api/v2/version/1/',
+                )
+                .map(entry => entry.flavor_text)[0]
+                .replace(/\s+/g, ' ')
+            const uri = `https://img.pokemondb.net/artwork/${
+                this.state.name
+            }.jpg`
+            this.setState({
+                uri: uri,
+                description: description,
+            })
+        } catch (err) {
+            console.log(err)
+            this.setState({
+                ...this.state.default,
+            })
+        } finally {
+            this.setState({ isReady: true })
+        }
     }
+
     render() {
         return (
             <View
@@ -75,6 +80,19 @@ export default class DetailsScreen extends Component {
                 )}
                 {this.state.isReady && (
                     <View>
+                        {this.state.uri ? (
+                            <Image
+                                style={{ width: 250, height: 250 }}
+                                source={{ uri: this.state.uri }}
+                                resizeMode="contain"
+                            />
+                        ) : (
+                            <Image
+                                style={{ width: 250, height: 250 }}
+                                source={this.state.image}
+                                resizeMode="contain"
+                            />
+                        )}
                         <Text h1>{this.state.name}</Text>
                         <Text>{this.state.description}</Text>
                     </View>
