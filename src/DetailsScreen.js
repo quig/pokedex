@@ -35,20 +35,21 @@ export default class DetailsScreen extends Component {
         }
     }
     componentDidMount() {
-        fetch(`http://pokeapi.co/api/v2/pokemon-species/${this.state.id}/`)
+        fetch(`https://pokeapi.co/api/v2/pokemon-species/${this.state.id}/`)
             .then(res => res.json())
             .then(data => {
                 const description = data.flavor_text_entries
                     .filter(
-                        description =>
-                            description.language.name === 'en' &&
-                            description.version.url ===
+                        entry =>
+                            entry.language.name === 'en' &&
+                            entry.version.url ===
                                 'https://pokeapi.co/api/v2/version/1/',
                     )
-                    .map(description => description.flavor_text)
+                    .map(entry => entry.flavor_text)[0]
+                console.log(description)
                 this.setState({
                     ...this.state,
-                    desription: description,
+                    description: description,
                     isReady: true,
                 })
             })
