@@ -1,4 +1,5 @@
 node_modules/**/*
+cloud-functions/functions/node_modules/**/*
 .expo/*
 npm-debug.*
 *.jks
