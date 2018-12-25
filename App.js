@@ -5,8 +5,10 @@ import PhotoScreen from './src/PhotoScreen'
 import { createStackNavigator, createAppContainer } from 'react-navigation'
 import firebase from 'firebase'
 import { FirebaseConfig } from './firebase.config'
+require('firebase/functions')
 
 firebase.initializeApp(FirebaseConfig)
+var functions = firebase.functions()
 
 const RootStack = createStackNavigator(
     {

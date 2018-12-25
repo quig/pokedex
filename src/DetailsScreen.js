@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react'
 import { Image, View, ActivityIndicator, Content } from 'react-native'
 import { Button, Text } from 'react-native-elements'
 import axios from 'axios'
+import Type from './TypeComponent'
 
 export default class DetailsScreen extends Component {
     static navigationOptions = ({ navigation, navigationOptions }) => {
@@ -88,8 +89,13 @@ export default class DetailsScreen extends Component {
                         ) : (
                             <Image source={this.state.image} />
                         )}
-                        <Text h1>{this.state.name}</Text>
-                        <Text>{this.state.description}</Text>
+                        <Text h1 style={{ textTransform: 'capitalize' }}>
+                            {this.state.name}
+                        </Text>
+                        <Text h4 style={{ textAlign: 'center' }}>
+                            {this.state.description}
+                        </Text>
+                        <Type types={this.state.types} />
                     </Fragment>
                 )}
             </View>

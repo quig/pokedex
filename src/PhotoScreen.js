@@ -1,8 +1,10 @@
-import React, { Component } from 'react'
-import { Button, Image, View } from 'react-native'
+import React, { Component, Fragment } from 'react'
+import { Button, Image, View, ActivityIndicator } from 'react-native'
 import { ImagePicker, Permissions } from 'expo'
 import uuid from 'uuid'
 import firebase from 'firebase'
+import { pokemon_list } from './PokemonList'
+require('firebase/functions')
 
 export default class PhotoScreen extends Component {
     state = {
@@ -20,15 +22,26 @@ export default class PhotoScreen extends Component {
                     justifyContent: 'center',
                 }}
             >
-                <Button
-                    title="Choose the image you want to analyse"
-                    onPress={this._pickImage}
-                />
+                {!image && (
+                    <Fragment>
+                        <Button
+                            title="Choose the image you want to analyse from your library"
+                            onPress={this._pickImage}
+                        />
+                        <Button
+                            title="Or take a picture"
+                            onPress={this._pickImage}
+                        />
+                    </Fragment>
+                )}
                 {image && (
-                    <Image
-                        source={{ uri: image }}
-                        style={{ width: 200, height: 200 }}
-                    />
+                    <Fragment>
+                        <Image
+                            source={{ uri: image }}
+                            style={{ width: 200, height: 200 }}
+                        />
+                        <ActivityIndicator size="small" color="#f4511e" />
+                    </Fragment>
                 )}
             </View>
         )
@@ -70,7 +83,26 @@ export default class PhotoScreen extends Component {
                 })
                 if (!result.cancelled) {
                     this.setState({ image: result.uri })
-                    this._uploadAsFile(result.uri)
+                    const fileUri = await this._uploadAsFile(result.uri)
+                    var addMessage = firebase
+                        .functions()
+                        .httpsCallable('analysePokemonHttp')
+                    try {
+                        const {
+                            data: { guess: pokemon_guessed },
+                        } = await addMessage({ uri: fileUri })
+
+                        const pokemon = pokemon_guessed
+                            ? pokemon_guessed
+                            : 'unown'
+                        this.props.navigation.navigate('Details', {
+                            pokemon: pokemon_list.filter(
+                                pkmn => pkmn.name === pokemon,
+                            )[0],
+                        })
+                    } catch (error) {
+                        console.log(error)
+                    }
                 }
             }
         } catch (error) {

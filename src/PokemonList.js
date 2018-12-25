@@ -905,4 +905,10 @@ export const pokemon_list = [
         types: ['psychic'],
         image: require('../assets/sprites/151.png'),
     },
+    {
+        id: 201,
+        name: 'unown',
+        types: ['?'],
+        image: require('../assets/sprites/201.png'),
+    },
 ]
