@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react'
-import { Button, Image, View, ActivityIndicator } from 'react-native'
+import { Image, View, ActivityIndicator } from 'react-native'
+import { Button } from 'react-native-elements'
 import { ImagePicker, Permissions } from 'expo'
 import uuid from 'uuid'
 import firebase from 'firebase'
@@ -10,6 +11,9 @@ export default class PhotoScreen extends Component {
     state = {
         image: null,
     }
+    willFocus = this.props.navigation.addListener('willFocus', payload => {
+        this.setState({ image: null })
+    })
 
     render() {
         let { image } = this.state
@@ -25,12 +29,22 @@ export default class PhotoScreen extends Component {
                 {!image && (
                     <Fragment>
                         <Button
-                            title="Choose the image you want to analyse from your library"
+                            large
+                            rounded
+                            icon={{ name: 'photo-library' }}
+                            backgroundColor="#23a0f5"
+                            title="Choose the image from your library"
                             onPress={this._pickImage}
+                            style={{ padding: 10 }}
                         />
                         <Button
+                            large
+                            rounded
+                            icon={{ name: 'squirrel', type: 'octicon' }}
+                            backgroundColor="#ff6126"
                             title="Or take a picture"
-                            onPress={this._pickImage}
+                            onPress={this._capturePhoto}
+                            style={{ padding: 10 }}
                         />
                     </Fragment>
                 )}
@@ -70,6 +84,29 @@ export default class PhotoScreen extends Component {
         return await snapshot.ref.getDownloadURL()
     }
 
+    _analyseImage = async uri => {
+        var addMessage = firebase
+            .functions()
+            .httpsCallable('analysePokemonHttp')
+        try {
+            const {
+                data: { guess: pokemon_guessed },
+            } = await addMessage({ uri: uri })
+
+            return pokemon_guessed ? pokemon_guessed : 'unown'
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    _analyseAndRedirect = async () => {
+        const fileUri = await this._uploadAsFile(this.state.image)
+        const result = await this._analyseImage(fileUri)
+        this.props.navigation.navigate('Details', {
+            pokemon: pokemon_list.filter(pkmn => pkmn.name === result)[0],
+        })
+    }
+
     _pickImage = async () => {
         try {
             const res = await Promise.all([
@@ -83,26 +120,28 @@ export default class PhotoScreen extends Component {
                 })
                 if (!result.cancelled) {
                     this.setState({ image: result.uri })
-                    const fileUri = await this._uploadAsFile(result.uri)
-                    var addMessage = firebase
-                        .functions()
-                        .httpsCallable('analysePokemonHttp')
-                    try {
-                        const {
-                            data: { guess: pokemon_guessed },
-                        } = await addMessage({ uri: fileUri })
+                    this._analyseAndRedirect()
+                }
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
-                        const pokemon = pokemon_guessed
-                            ? pokemon_guessed
-                            : 'unown'
-                        this.props.navigation.navigate('Details', {
-                            pokemon: pokemon_list.filter(
-                                pkmn => pkmn.name === pokemon,
-                            )[0],
-                        })
-                    } catch (error) {
-                        console.log(error)
-                    }
+    _capturePhoto = async () => {
+        try {
+            const res = await Promise.all([
+                Permissions.askAsync(Permissions.CAMERA),
+                Permissions.askAsync(Permissions.CAMERA_ROLL),
+            ])
+            if (res.some(o => o.status === 'granted')) {
+                let result = await ImagePicker.launchCameraAsync({
+                    allowsEditing: true,
+                    aspect: [4, 3],
+                })
+                if (!result.cancelled) {
+                    this.setState({ image: result.uri })
+                    this._analyseAndRedirect()
                 }
             }
         } catch (error) {
